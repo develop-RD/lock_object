@@ -19,4 +19,4 @@ while(1):
 cap.release()
 
 # De-allocate any associated memory usage
-cv2.destroyAllWindows() 
+cv2.destroyAllWindows()
