@@ -1,0 +1,171 @@
+<!doctype html>
+<form id="param">
+
+  <ul> <label>H1 = <span id="red_label"></span></label>
+  </ul>
+  <ul> <label>S1 = <span id="green_label"></span></label>
+  </ul>
+</form>
+
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> He-he </title>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="/resources/demos/style.css">
+
+  <style>
+    .positioned_H_L {
+      position: absolute;
+      background: yellow;
+      width: 30px;
+      top: 85px;
+	  left: 10px;
+    }
+ .positioned_H_R {
+      position: absolute;
+      width: 30px;
+      top: 85px;
+	  left: 350px;
+    }
+#red{
+ 	position: absolute;
+    width: 300px;
+   top: 85px;
+   left: 45px;
+  }
+.positioned_V_L {
+      position: absolute;
+      background: yellow;
+      width: 30px;
+      top: 135px;
+	  left: 10px;
+    }
+ .positioned_V_R {
+      position: absolute;
+      width: 30px;
+      top: 135px;
+	  left: 350px;
+    }
+  #green {
+ 	position: absolute;
+    width: 300px;
+   top: 135px;
+   left: 45px;
+  }
+  
+.container2 {
+      position: relative;
+      top: 50px;
+	  left: 10px;
+    }
+  #swatch {
+    width: 120px;
+    height: 100px;
+    margin-top: 18px;
+    margin-left: 350px;
+    background-image: none;
+  }
+  #red .ui-slider-range { background: #ef2929; }
+  #red .ui-slider-handle { border-color: #ef2929; }
+  #green .ui-slider-range { background: #8ae234; }
+  #green .ui-slider-handle { border-color: #8ae234; }
+  </style>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+  <script>
+    $( function() {
+    function hexFromRGB(r, g, b) {
+      var hex = [
+        r.toString( 16 ),
+        g.toString( 16 ),
+        b.toString( 16 )
+      ];
+      $.each( hex, function( nr, val ) {
+        if ( val.length === 1 ) {
+          hex[ nr ] = "0" + val;
+        }
+      });
+      return hex.join( "" ).toUpperCase();
+    }
+    
+        // Работа с кнопками
+    $("#btnHRight").button().click(function(){
+    $( "#red" ).slider( "value",$( "#red" ).slider( "value" ) + 1);
+    });  
+        $("#btnHLeft").button().click(function(){
+    $( "#red" ).slider( "value",$( "#red" ).slider( "value" ) - 1);
+    }); 
+    // Кнопки за вертикальные значения
+    $("#btnVRight").button().click(function(){
+    $( "#green" ).slider( "value",$( "#green" ).slider( "value" ) + 1);
+    });  
+    $("#btnVLeft").button().click(function(){
+    $( "#green" ).slider( "value",$( "#green" ).slider( "value" ) - 1);
+    }); 
+    
+    // Функция вызывается при change
+    function refreshSwatch() {
+      var red = $( "#red" ).slider( "value" );
+      var green = $( "#green" ).slider( "value" );
+     
+        // заполняю поля для видимости значений
+        $('#red_label').text(red);
+        $('#green_label').text(green);
+       
+        // отправляю запрос на сайт
+      $.ajax({
+      url: '/login',
+      type: 'post',
+      data: {red,green}
+      });
+    }
+
+    $( "#red").slider({
+      orientation: "horizontal",
+      range: "min",
+      max: 20,
+      min: 0,	
+      value: 10,
+      change: refreshSwatch
+    });
+    $( "#green").slider({
+      orientation: "horizontal",
+      range: "min",
+      max: 20,
+      min: 0,
+      value: 5,
+      change: refreshSwatch
+    });
+    // стартовые значения
+    $( "#red" ).slider( "value", 10 );
+    $( "#green" ).slider( "value", 5 );
+  } );
+  </script>
+</head>
+
+<body class="ui-widget-content" style="border:0;">
+
+<div class="container2">
+    <div class="row">
+        <div class="col-lg-8  offset-lg-2">
+            <h3 class="mt-5">!!!</h3>
+            <img src="{{ url_for('video_feed') }}" width="100%">
+        </div>
+    </div>
+</div>
+
+ <form>
+<input class="positioned_H_L" id = "btnHLeft" type="submit" value="<"/>
+ <div id="red"></div>  
+<input class="positioned_H_R" id = "btnHRight" type="submit" value=">"/>
+
+<input class="positioned_V_L" id = "btnVLeft" type="submit" value="<"/>
+<div id="green"></div>
+<input class="positioned_V_R" id = "btnVRight" type="submit" value=">"/>
+</form>
+
+
+</body>
