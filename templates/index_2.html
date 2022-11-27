@@ -1,9 +1,9 @@
 <!doctype html>
 <form id="param">
 
-  <ul> <label>H1 = <span id="red_label"></span></label>
+  <ul> <label>Horizontal = <span id="red_label"></span></label>
   </ul>
-  <ul> <label>S1 = <span id="green_label"></span></label>
+  <ul> <label>Vertical = <span id="green_label"></span></label>
   </ul>
 </form>
 
@@ -35,7 +35,14 @@
    top: 85px;
    left: 45px;
   }
-.positioned_V_L {
+
+  #green {
+ 	position: absolute;
+    width: 300px;
+   top: 135px;
+   left: 45px;
+  }
+  .positioned_V_L {
       position: absolute;
       background: yellow;
       width: 30px;
@@ -48,16 +55,10 @@
       top: 135px;
 	  left: 350px;
     }
-  #green {
- 	position: absolute;
-    width: 300px;
-   top: 135px;
-   left: 45px;
-  }
   
 .container2 {
-      position: relative;
-      top: 50px;
+      position: absolute;
+      top: 150px;
 	  left: 10px;
     }
   #swatch {
@@ -76,6 +77,22 @@
   <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
   <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
   <script>
+
+    // Работа с кнопками
+    $(document).on('click', '#btnHRight', function(){
+         $( "#red" ).slider( "value",$( "#red" ).slider( "value" ) + 1);
+
+    });
+      $(document).on('click', '#btnHLeft', function(){
+        $( "#red" ).slider( "value",$( "#red" ).slider( "value" ) - 1);
+
+    });   $(document).on('click', '#btnVRight', function(){
+        $( "#green" ).slider( "value",$( "#green" ).slider( "value" ) + 1);
+
+    });   $(document).on('click', '#btnVLeft', function(){
+        $( "#green" ).slider( "value",$( "#green" ).slider( "value" ) - 1);
+
+    });
     $( function() {
     function hexFromRGB(r, g, b) {
       var hex = [
@@ -91,21 +108,7 @@
       return hex.join( "" ).toUpperCase();
     }
     
-        // Работа с кнопками
-    $("#btnHRight").button().click(function(){
-    $( "#red" ).slider( "value",$( "#red" ).slider( "value" ) + 1);
-    });  
-        $("#btnHLeft").button().click(function(){
-    $( "#red" ).slider( "value",$( "#red" ).slider( "value" ) - 1);
-    }); 
-    // Кнопки за вертикальные значения
-    $("#btnVRight").button().click(function(){
-    $( "#green" ).slider( "value",$( "#green" ).slider( "value" ) + 1);
-    });  
-    $("#btnVLeft").button().click(function(){
-    $( "#green" ).slider( "value",$( "#green" ).slider( "value" ) - 1);
-    }); 
-    
+      
     // Функция вызывается при change
     function refreshSwatch() {
       var red = $( "#red" ).slider( "value" );
@@ -128,9 +131,10 @@
       range: "min",
       max: 20,
       min: 0,	
-      value: 10,
+  //    value: 10,
       change: refreshSwatch
     });
+
     $( "#green").slider({
       orientation: "horizontal",
       range: "min",
@@ -156,16 +160,17 @@
         </div>
     </div>
 </div>
-
+<!-- Специальная форма для слайдеров_-->
  <form>
-<input class="positioned_H_L" id = "btnHLeft" type="submit" value="<"/>
- <div id="red"></div>  
-<input class="positioned_H_R" id = "btnHRight" type="submit" value=">"/>
+    <div id="red"></div>  
+    <div id="green"></div>
 
-<input class="positioned_V_L" id = "btnVLeft" type="submit" value="<"/>
-<div id="green"></div>
-<input class="positioned_V_R" id = "btnVRight" type="submit" value=">"/>
 </form>
+<!-- Отдельный класс кнопок из jquery  -->
+<button class="positioned_H_R" id = "btnHRight">  >  </button>
+<button class="positioned_H_L" id = "btnHLeft">  <  </button>
+<button class="positioned_V_R" id = "btnVRight">  >  </button>
+<button class="positioned_V_L" id = "btnVLeft">  <  </button>
 
 
 </body>

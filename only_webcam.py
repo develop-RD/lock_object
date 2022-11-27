@@ -52,7 +52,7 @@ def index():
         else:
             print("not open /dev/video"+str(i))
 
-    return render_template('index.html')
+    return render_template('index_2.html')
 
 @app.route('/login', methods=["POST","GET"])
 def login():
