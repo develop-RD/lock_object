@@ -8,7 +8,7 @@ import wiringpi
 OUTPUT = 1 # настройка пина на выход
 PIN_TO_PWM_0 = 2 # 7 pin
 PIN_TO_PWM_1 = 3 # 8 pin
-FREQ_PWM = 500
+FREQ_PWM = 1200
 wiringpi.wiringPiSetup()
 
 # инитим пин на выход
@@ -69,7 +69,7 @@ def login():
             pwm_az = int(h1)
             wiringpi.delay(100)
             wiringpi.softPwmWrite(PIN_TO_PWM_0,pwm_az)
-            wiringpi.delay(100)
+            wiringpi.delay(800)
             wiringpi.softPwmStop(PIN_TO_PWM_0)
   #          wiringpi.delay(200)
        
@@ -78,7 +78,7 @@ def login():
             pwm_tilt = int(s1)
             wiringpi.delay(100)
             wiringpi.softPwmWrite(PIN_TO_PWM_1,pwm_tilt)
-            wiringpi.delay(100)
+            wiringpi.delay(800)
 
             wiringpi.softPwmStop(PIN_TO_PWM_1)
      #       wiringpi.delay(200)
