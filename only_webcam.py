@@ -27,10 +27,25 @@ pwm_tilt = 0
 
 def gen_frames():
     global camera
-
+    kernal = np.ones((5, 5), np.uint8)
+    motion_threshold = 1500
     while True:
         success, frame = camera.read()  # read the camera frame
+        success2, frame2 = camera.read()  # read the camera frame
         if (camera.isOpened() == True):
+            frame_gray_1 = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            frame_gray_2 = cv2.cvtColor(frame2, cv2.COLOR_BGR2GRAY)
+            diffImage = cv2.absdiff(frame_gray_1, frame_gray_2)  # определяем разницу между двумя кадрами
+            blurImage = cv2.GaussianBlur(diffImage, (5, 5), 0)
+            _, thresholdImage = cv2.threshold(blurImage, 20, 255, cv2.THRESH_BINARY)
+            dilatedImage = cv2.dilate(thresholdImage, kernal, iterations=5)
+            contours, _ = cv2.findContours(dilatedImage, cv2.RETR_TREE,
+                                           cv2.CHAIN_APPROX_SIMPLE)  # find contour is a magic function
+            for contour in contours:  # for every change that is detected
+                (x, y, w, h) = cv2.boundingRect(contour)  # находим местоположение где зафиксировано изменение
+                if cv2.contourArea(contour) > motion_threshold:
+                    cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 1)
+
             ret, buffer = cv2.imencode('.jpg', cv2.flip(frame, 1))
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
