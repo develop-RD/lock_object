@@ -29,6 +29,9 @@ frame_end = 0
 
 # Функция захвата изображения и определения размеров объекта
 def videoWork():
+    max_w = 120 #ширина объекта
+    max_h = 200 #высота объекта
+    count_detect = 0 # количество кадров, когда объект был в обзоре
     global frame_end
     #поиск подходящей камеры
     #(под Linux может инициализироваться в разных местах)
@@ -60,7 +63,13 @@ def videoWork():
                 (x, y, w, h) = cv2.boundingRect(contour)  # находим местоположение где зафиксировано изменение
                 if cv2.contourArea(contour) > motion_threshold:
                     cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 1)
-            ret, buffer = cv2.imencode('.jpg', cv2.flip(frame, 1))
+                    cv2.putText(frame,"w="+str(w)+"h="+str(h),(x+5, y+5), cv2.FONT_HERSHEY_SIMPLEX,1,(255, 0, 0), 1)
+                if ((max_w <= w) and (max_h <= h)):
+                    count_detect=count_detect + 1
+                    if (count_detect == 60):
+                        print("!!!WARNING!!! Foreign object!")
+                        count_detect=0
+            ret, buffer = cv2.imencode('.jpg', frame)
             frame_end = buffer.tobytes()
 
 def gen_frames():
