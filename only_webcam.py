@@ -1,10 +1,11 @@
 #!/usr/bin/env python
-#!/usr/bin/env python
 from datetime import datetime
 from flask import Flask, render_template, Response, request
 import numpy as np
 import cv2
 import wiringpi
+from threading import Thread
+import time
 
 OUTPUT = 1 # настройка пина на выход
 PIN_TO_PWM_0 = 2 # 7 pin
@@ -15,10 +16,6 @@ wiringpi.wiringPiSetup()
 # инитим пин на выход
 wiringpi.pinMode(PIN_TO_PWM_0,OUTPUT)
 wiringpi.pinMode(PIN_TO_PWM_1,OUTPUT)
-# настрйока частоты работы ШИМ
-#wiringpi.softPwmCreate(PIN_TO_PWM_0,0,FREQ_PWM)
-#wiringpi.softPwmCreate(PIN_TO_PWM_1,0,FREQ_PWM)
-#wiringpi.softPwmStop(PIN_TO_PWM_0)
 
 #Initialize the Flask app
 app = Flask(__name__)
@@ -26,10 +23,27 @@ app = Flask(__name__)
 pwm_az = 0
 pwm_tilt = 0
 
-def gen_frames():
-    global camera
-    kernal = np.ones((5, 5), np.uint8)
-    motion_threshold = 1500
+# финальный фрейм , который будет отправлен на сервак
+global frame_end
+frame_end = 0
+
+# Функция захвата изображения и определения размеров объекта
+def videoWork():
+    global frame_end
+    #поиск подходящей камеры
+    #(под Linux может инициализироваться в разных местах)
+    for i in range(5):
+        print("Camera = /dev/video"+str(i))
+        camera = cv2.VideoCapture("/dev/video"+str(i))
+        if (camera.isOpened() == True):
+            print("webcam open video"+str(i))
+            break
+        else:
+            print("not open /dev/video"+str(i))
+    
+
+    kernal = np.ones((5, 5), np.uint8)  # form a 5x5 matrix with all ones range is 8-bit
+    motion_threshold = 1500  # decrease this value to increase sensitivity (уменьшите это значение чтобы увеличить чувствительность)
     while True:
         success, frame = camera.read()  # read the camera frame
         success2, frame2 = camera.read()  # read the camera frame
@@ -46,29 +60,20 @@ def gen_frames():
                 (x, y, w, h) = cv2.boundingRect(contour)  # находим местоположение где зафиксировано изменение
                 if cv2.contourArea(contour) > motion_threshold:
                     cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 1)
-
             ret, buffer = cv2.imencode('.jpg', cv2.flip(frame, 1))
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-        else:
-            print("no device webcam")
+            frame_end = buffer.tobytes()
+
+def gen_frames():
+    global frame_end
+    while(True):
+        #TODO: необходима задержка(видимо нужен блок для переключения потоков)
+        time.sleep(0.05)
+        yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame_end + b'\r\n')
 
 @app.route('/')
 def index():
-    global camera
-    for i in range(5):
-        print("/dev/video"+str(i))
-        camera = cv2.VideoCapture("/dev/video"+str(i))
-#        camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
- #       camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-        if (camera.isOpened() == True):
-            print("webcam open video"+str(i))
-            break
-        else:
-            print("not open /dev/video"+str(i))
-
-    return render_template('index_2.html')
+       return render_template('index_2.html')
 
 @app.route('/login', methods=["POST","GET"])
 def login():
@@ -108,6 +113,15 @@ def login():
 def video_feed():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+def runApp():
+    #app.run(host="localhost", port=8086, debug=False)
+    app.run(host="192.168.0.124", port=8086, debug=False)
+
 if __name__ == "__main__":
-    app.run(host="192.168.0.124", port=8086, debug=True)
-    #app.run(debug=True)
+    try:
+        print(f'start first thread')
+        t1 = Thread(target=runApp).start()
+        print(f'start second thread')
+        t2 = Thread(target=videoWork).start()
+    except Exception as e:
+        print("Unexpected error:" + str(e))
