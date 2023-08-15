@@ -6,6 +6,7 @@ import cv2
 import wiringpi
 from threading import Thread
 import time
+import telebot
 
 OUTPUT = 1 # настройка пина на выход
 PIN_TO_PWM_0 = 2 # 7 pin
@@ -26,7 +27,9 @@ pwm_tilt = 0
 # финальный фрейм , который будет отправлен на сервак
 global frame_end
 frame_end = 0
-
+# вводятся свои значения для телеграмма
+chat_id =
+ bot = telebot.TeleBot('')
 # Функция захвата изображения и определения размеров объекта
 def videoWork():
     max_w = 120 #ширина объекта
@@ -68,6 +71,8 @@ def videoWork():
                     count_detect=count_detect + 1
                     if (count_detect == 60):
                         print("!!!WARNING!!! Foreign object!")
+                        isWrite = cv2.imwrite("test.png",frame)
+                        bot.send_photo(chat_id,open("test.png","rb"))
                         count_detect=0
             ret, buffer = cv2.imencode('.jpg', frame)
             frame_end = buffer.tobytes()
